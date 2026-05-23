@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aula 13 - Automação de Testes e Testes Unitários com PHPUnit</title>
+<style>
+ body {
+ margin: 0; 
+ padding: 0; 
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ background-color: #f8f9fa; 
+ color: #212529;
+ display: flex; 
+ flex-direction: column; 
+ height: 100vh;
+ overflow: hidden;
+ }
+ .slide-container {
+ width: 95vw;
+ height: 85vh;
+ margin: auto;
+ display: flex; 
+ align-items: center; 
+ justify-content: center;
+ padding: 20px; 
+ box-sizing: border-box; 
+ position: relative;
+ }
+ .slide {
+ display: none; 
+ width: 100%; 
+ max-width: 1200px; 
+ height: 80vh;
+ background: #ffffff; 
+ border-radius: 12px;
+ box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+ padding: 50px;
+ font-size: 24px; 
+ line-height: 1.5; 
+ overflow-y: auto;
+ }
+ .slide.active { 
+ display: block; 
+ animation: fadeIn 0.4s ease-in-out;
+ }
+ @keyframes fadeIn {
+ from { opacity: 0; transform: translateY(10px); }
+ to { opacity: 1; transform: translateY(0); }
+ }
+ h1, h2, h3, h4 { 
+ color: #0d6efd; 
+ margin-top: 0; 
+ }
+ code, pre { 
+ background: #e9ecef; 
+ padding: 10px 15px; 
+ border-radius: 8px; 
+ font-family: 'Courier New', Courier, monospace; 
+ display: block; 
+ font-size: 20px;
+ overflow-x: auto;
+ white-space: pre-wrap;
+ }
+ .controls {
+ height: 80px; 
+ background: #ffffff; 
+ border-top: 1px solid #dee2e6;
+ display: flex; 
+ justify-content: space-between; 
+ align-items: center; 
+ padding: 0 50px;
+ }
+ button {
+ background: #0d6efd; 
+ color: white; 
+ border: none; 
+ padding: 12px 25px;
+ font-size: 18px; 
+ border-radius: 8px; 
+ cursor: pointer;
+ transition: background 0.2s;
+ }
+ button:hover {
+ background: #0b5ed7;
+ }
+ button:disabled { 
+ background: #adb5bd; 
+ cursor: not-allowed; 
+ }
+ .progress { 
+ font-size: 20px; 
+ font-weight: bold; 
+ color: #495057;
+ }
+ .slide-label { font-weight: bold; text-transform: uppercase; color: #6c757d; margin-bottom: 20px; font-size: 18px; letter-spacing: 1px; }
+ .callout { padding: 20px 30px; border-radius: 8px; margin: 20px 0; border-left: 8px solid; }
+ .callout.blue { background: #cce5ff; border-color: #004085; color: #004085; }
+ .callout.green { background: #d4edda; border-color: #155724; color: #155724; }
+ .callout.red { background: #f8d7da; border-color: #721c24; color: #721c24; }
+ .callout.yellow { background: #fff3cd; border-color: #856404; color: #856404; }
+ .section-header { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+ .section-num { font-size: 80px; font-weight: bold; color: #e9ecef; margin-bottom: -20px; }
+ .section-header h2 { font-size: 48px; color: #0d6efd; margin-bottom: 20px; }
+ img { max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0; border: 1px solid #dee2e6; }
+ table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 20px; }
+ th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+ th { background-color: #e9ecef; color: #0d6efd; }
+</style>
+</head>
+<body>
+ <div class="slide-container" id="slides">
+
+ <div class="slide active">
+ <div class="slide-label">Aula 13</div>
+ <h1>Aula 13 - Automação de Testes e Testes Unitários com PHPUnit</h1>
+ <p><strong>Descrição:</strong> Nesta aula, vamos aprender a substituir os testes manuais e informais por rotinas automatizadas e profissionais utilizando a Pirâmide de Testes.</p>
+ <p>Através de exemplos práticos, abordaremos os conceitos de testes unitários, o padrão Triple A (Arrange, Act, Assert) e a documentação de Casos de Testes.</p>
+ <p>Ao final, você aplicará esses conceitos diretamente no projeto da sua equipe (SA), configurando o ambiente via Composer e gerando scripts de teste reais.</p>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">01</div>
+ <h2>1. O Problema dos Testes Informais vs. A Necessidade de Automação</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>1. O Problema dos Testes Informais vs. A Necessidade de Automação</h2>
+ <p>Tradicionalmente, os programadores tendem a testar seus códigos por meio de métodos manuais e informais, como a inserção de condicionais (if) temporários ou comandos de impressão direta na tela, a exemplo de var_dump() no PHP ou console.log() no JavaScript.</p>
+ <p>Essa abordagem traz riscos operacionais graves: há o perigo real de esquecer esses códigos de depuração na versão enviada para produção e a extrema dificuldade de replicar tais testes à medida que o sistema cresce em volume e complexidade.</p>
+ </div>
+
+ <div class="slide">
+ <h2>A Solução Profissional: Automação</h2>
+ <p>A automação surge como a solução profissional para esse gargalo, consistindo na execução de rotinas por meio de ferramentas dedicadas que geram scripts reutilizáveis.</p>
+ <p>Em vez de navegar manualmente por formulários e interfaces a cada modificação, o desenvolvedor executa scripts automatizados em segundos para assegurar que novas alterações não quebraram funcionalidades preexistentes.</p>
+ <p>Isso libera o profissional para tarefas mais complexas e confere maior previsibilidade ao projeto.</p>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">02</div>
+ <h2>2. Planejamento Estratégico e a Pirâmide de Testes</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>2. Planejamento Estratégico e a Pirâmide de Testes</h2>
+ <p>A decisão sobre o que e quando automatizar exige rigor técnico. Não se deve automatizar sistemas instáveis ou sob constante mutação de regras e dados, pois o custo de manutenção dos scripts superaria o retorno sobre o investimento (ROI).</p>
+ <p>Para equilibrar a velocidade de execução e o custo de manutenção, a Engenharia de Software preconiza o uso da Pirâmide de Testes. No ecossistema PHP, essa pirâmide divide-se em camadas bem definidas:</p>
+ </div>
+
+ <div class="slide">
+ <h2>As Camadas da Pirâmide de Testes</h2>
+ <ul>
+ <li><strong>Análise Estática:</strong> Validação de padrões e erros de tipagem sem executar o código, utilizando ferramentas como PHPStan e Psalm.</li>
+ <li><strong>Testes Unitários (Base):</strong> Focam na menor fração isolada do código, garantindo rapidez e baixo custo de manutenção. O framework padrão da indústria para essa camada é o PHPUnit.</li>
+ <li><strong>Testes de Integração (Meio):</strong> Verificam se múltiplas unidades e componentes funcionam adequadamente em conjunto, validando fluxos que conectam controladores, serviços, repositórios e o banco de dados. Ferramentas como o Codeception apoiam essa etapa.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>As Camadas da Pirâmide de Testes (Continuação)</h2>
+ <ul>
+ <li><strong>Testes E2E e de Comportamento (Topo):</strong> Simulam o fluxo completo sob a perspectiva do usuário final, utilizando frameworks de BDD (Behavior-Driven Development) como o Behat ou ferramentas de automação web como Cypress e Playwright.</li>
+ </ul>
+ <p>Geralmente, os testes focados no código interno (como unidade e integração) pertencem à categoria de Testes Caixa Branca, cujo propósito é validar e obter respostas diretas de funções, classes e estruturas de banco de dados.</p>
+ <p>Para que esses testes operem com confiabilidade, o ambiente deve garantir a Idempotência, ou seja, assegurar que o cenário de testes sempre retorne ao seu estado original após cada execução, evitando que dados residuais contaminem as próximas rodadas.</p>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">03</div>
+ <h2>3. Fundamentos do Teste Unitário</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>3. Fundamentos do Teste Unitário</h2>
+ <p>O teste unitário consiste na verificação da menor fração de código possível de forma totalmente isolada.</p>
+ <p>Na Programação Orientada a Objetos (POO), essa fração isolada reflete-se, essencialmente, nos métodos de uma classe. O principal pré-requisito do teste unitário é o completo isolamento: o método sob teste não pode interagir com o banco de dados real, redes ou APIs externas.</p>
+ </div>
+
+ <div class="slide">
+ <h2>Vantagens da Metodologia Unitária</h2>
+ <p>Entre as principais vantagens dessa metodologia destacam-se:</p>
+ <ul>
+ <li>O isolamento rápido de erros;</li>
+ <li>A alta repetibilidade de rotinas;</li>
+ <li>A facilidade de manutenção de rotinas lógicas;</li>
+ <li>A segurança ao realizar refatorações estruturais (refactoring) sem o temor de inserir novos bugs;</li>
+ <li>A constituição de uma "documentação viva", dado que os arquivos de testes expressam de forma técnica e atualizada exatamente o comportamento esperado do sistema.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">04</div>
+ <h2>4. O Framework PHPUnit: Pilares e Anatomia</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>4. O Framework PHPUnit: Pilares e Anatomia</h2>
+ <p>Criado por Sebastian Bergmann, o PHPUnit é a ferramenta padrão e indispensável no ecossistema PHP, servindo de alicerce para metodologias como o TDD (Test-Driven Development) e vindo pré-configurado em frameworks modernos como Laravel e Symfony.</p>
+ <p>O funcionamento prático do framework apoia-se em três pilares fundamentais:</p>
+ </div>
+
+ <div class="slide">
+ <h2>Os Três Pilares do PHPUnit</h2>
+ <strong>A. Casos de Teste (Test Cases):</strong> Classes de teste que estendem obrigatoriamente a classe base <i><b>PHPUnit\Framework\TestCase</i></b>, contendo métodos de validação cujos nomes começam com o prefixo test ou utilizam a anotação @test.
+</div>
+
+ <div class="slide">
+ <h2>Os Três Pilares do PHPUnit (Continuação)</h2>
+<strong>B. Asserções (Assertions):</strong> Métodos que confrontam o resultado gerado pelo código com o resultado esperado (o "oráculo" do teste). Se a asserção for verdadeira, o teste passa (feedback visual do ponto verde no terminal); se falsa, o teste falha (exibindo um F vermelho acompanhado do motivo da falha). Exemplos comuns incluem 
+<ul>
+<li>assertEquals(),</li> 
+<li>assertTrue() e </li>  
+<li>assertInstanceOf().</li>
+</ul>
+</div>
+
+ <div class="slide">
+ <h2>Os Três Pilares do PHPUnit (Continuação)</h2>
+ <li><strong>C. Ciclo de Vida (Fixtures):</strong> Métodos voltados à preparação e limpeza do ambiente. O método <i><b>setUp()</i></b> roda de forma automática antes de cada teste da classe, enquanto o <i><b>tearDown()</i></b> é acionado após a conclusão do teste para limpar resíduos.
+ </div>
+
+ <div class="slide">
+ <h2>A Estrutura Padrão Triple A</h2>
+ <p>A escrita interna de um teste profissional segue o padrão Triple A (Arrange, Act, Assert):</p>
+ <ul>
+ <li><strong>Arrange (Preparação):</strong> Configuração prévia e instância de objetos necessários.</li>
+ <li><strong>Act (Ação):</strong> Invocação direta do método ou função que se deseja testar.</li>
+ <li><strong>Assert (Verificação):</strong> Execução das asserções para validar os resultados obtidos.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>Vantagens sobre Soluções Caseiras</h2>
+ <p>A utilização de um ecossistema maduro como o PHPUnit sobrepõe-se à criação de frameworks caseiros baseados em if/echo porque:</p>
+ <ul>
+ <li>Automatiza relatórios visuais densos;</li>
+ <li>Gera métricas complexas de cobertura de código (code coverage);</li>
+ <li>Integra-se com pipelines de CI/CD via arquivos XML;</li>
+ <li>Fornece ferramentas nativas de Mocking para simular de forma segura bancos de dados ou APIs sem alterar registros reais.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">05</div>
+ <h2>5. Configuração, Prática Industrial e Documentação</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>5. Configuração, Prática Industrial e Documentação</h2>
+ <p>Para a operacionalização dos testes no ambiente local, é exigido o levantamento de parâmetros de infraestrutura (requisitos de SO, rede, memória, variáveis de ambiente e massa de dados estável), estruturando o ecossistema com o gerenciador de dependências Composer, isolamento por meio de Docker ou Vagrant e parametrização global via arquivo phpunit.xml.</p>
+ <p>Profissionalmente, a automação não caminha dissociada da documentação de Engenharia de Software.</p>
+ </div>
+
+ <div class="slide">
+ <h2>Estrutura de Casos de Teste e Rastreabilidade</h2>
+ <p>As equipes devem mapear os testes lógicos através de Casos de Teste estruturados, contendo:</p>
+ <ul>
+ <li>ID, Título e Pré-condições;</li>
+ <li>Passos de execução e Dados de entrada;</li>
+ <li>Resultado esperado, Resultado obtido e o Status (Aprovado/Reprovado).</li>
+ </ul>
+ <p>Atrelar cada caso de teste analítico ao seu respectivo script automatizado (ex: associar o cenário de login com sucesso ao método testLoginSucesso()) é a prática de mercado que garante a rastreabilidade de bugs e a integridade de entregas complexas.</p>
+ <div class="callout blue">
+ <p><strong>Atividade:</strong> ATIVIDADE GUIADA e DESAFIO PRÁTICO - Em anexo</p>
+ </div>
+ </div>
+
+ <div class="slide">
+ <div class="section-header">
+ <div class="section-num">06</div>
+ <h2>Conclusão</h2>
+ </div>
+ </div>
+
+ <div class="slide">
+ <h2>Conclusão</h2>
+ <p>Esta aula marca a transição fundamental de práticas amadoras de depuração manual para a engenharia de software profissional através da automação de testes.</p>
+ <p>A essência deste conteúdo demonstra que depender de testes informais traz sérios riscos à medida que o sistema cresce, tornando a automação essencial para garantir a segurança, a reutilização de rotinas e a previsibilidade do projeto.</p>
+ </div>
+
+ <div class="slide">
+ <h2>Pilares Consolidados</h2>
+ <p>Em resumo, os principais pilares consolidados no documento são:</p>
+ <ul>
+ <li><strong>Estratégia e a Pirâmide de Testes:</strong> A decisão de como testar deve ser guiada pela Pirâmide de Testes, que divide as validações em camadas estruturadas (Análise Estática, Testes Unitários, Integração e E2E) para equilibrar velocidade de execução e custo de manutenção.</li>
+ <li><strong>Foco no Teste Unitário:</strong> A base dessa pirâmide exige o isolamento completo da menor fração de código possível (como métodos de uma classe), garantindo que a lógica seja validada sem interferência de bancos de dados ou APIs externas.</li>
+ </ul>
+ </div>
+
+ <div class="slide">
+ <h2>Pilares Consolidados (Continuação)</h2>
+ <ul>
+ <li><strong>O Framework PHPUnit:</strong> Apresentado como a ferramenta indispensável do ecossistema PHP, ele operacionaliza os testes de forma automatizada. Seu funcionamento é garantido por três elementos estruturais: Casos de Teste, Asserções (que validam se o resultado é o esperado) e Ciclo de Vida (Fixtures) para preparação e limpeza do ambiente.</li>
+ <li><strong>Padronização Triple A:</strong> A escrita interna do código de teste deve seguir o padrão profissional Arrange (Preparação), Act (Ação) e Assert (Verificação) para manter o código limpo e lógico.</li>
+ <li><strong>Documentação e Infraestrutura:</strong> A automação profissional não existe sem um ambiente bem configurado (via Composer, Docker, etc.) e sem a correta documentação e mapeamento dos Casos de Teste na Engenharia de Software, o que garante a rastreabilidade de bugs.</li>
+ </ul>
+ </div>
+
+ </div>
+
+ <div class="controls">
+ <button id="prevBtn" onclick="prevSlide()" disabled>Anterior</button>
+ <div class="progress"><span id="current">1</span> / <span id="total"></span></div>
+ <button id="nextBtn" onclick="nextSlide()">Próximo</button>
+ </div>
+
+ <script>
+ let currentSlideIndex = 0;
+ const slides = document.querySelectorAll('.slide');
+ const totalSlides = slides.length;
+ const currentIndicator = document.getElementById('current');
+ const totalIndicator = document.getElementById('total');
+ const prevBtn = document.getElementById('prevBtn');
+ const nextBtn = document.getElementById('nextBtn');
+
+ totalIndicator.textContent = totalSlides;
+
+ function updateView() {
+ slides.forEach((slide, index) => {
+ slide.classList.remove('active');
+ if (index === currentSlideIndex) {
+ slide.classList.add('active');
+ }
+ });
+ currentIndicator.textContent = currentSlideIndex + 1;
+ 
+ prevBtn.disabled = currentSlideIndex === 0;
+ nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+ }
+
+ function nextSlide() {
+ if (currentSlideIndex < totalSlides - 1) {
+ currentSlideIndex++;
+ updateView();
+ }
+ }
+
+ function prevSlide() {
+ if (currentSlideIndex > 0) {
+ currentSlideIndex--;
+ updateView();
+ }
+ }
+
+ document.addEventListener('keydown', (e) => {
+ if (e.key === 'ArrowRight' || e.key === 'PageDown') nextSlide();
+ if (e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+ });
+ </script>
+</body>
+</html>
