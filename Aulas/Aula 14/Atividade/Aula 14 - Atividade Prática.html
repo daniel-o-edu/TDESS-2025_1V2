@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Atividade Prática: Caça aos Bugs com PHPUnit</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 15mm;
+            @bottom-right {
+                content: "Página " counter(page) " de " counter(pages);
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-size: 9pt;
+                color: #64748b;
+            }
+        }
+        
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #334155;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            font-size: 10.5pt;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            font-size: 20pt;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 12pt;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        h2 {
+            color: #1e293b;
+            font-size: 14pt;
+            border-left: 4px solid #2563eb;
+            padding-left: 10px;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            page-break-after: avoid;
+        }
+
+        h3 {
+            color: #0f172a;
+            font-size: 11.5pt;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            page-break-after: avoid;
+        }
+
+        p {
+            margin-top: 0;
+            margin-bottom: 10px;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin-top: 0;
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        .alert-box {
+            background-color: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+            page-break-inside: avoid;
+        }
+
+        .alert-box p {
+            margin: 0;
+            color: #14532d;
+        }
+
+        .dica-box {
+            background-color: #fefce8;
+            border: 1px solid #fef08a;
+            border-left: 4px solid #ca8a04;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            page-break-inside: avoid;
+        }
+
+        .dica-box h4 {
+            margin: 0 0 5px 0;
+            color: #854d0e;
+            font-size: 10.5pt;
+            text-transform: uppercase;
+        }
+
+        .dica-box p {
+            margin: 0;
+            color: #713f12;
+            font-size: 10pt;
+        }
+
+        pre {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 12px;
+            overflow-x: auto;
+            margin-top: 0;
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+
+        code {
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 9.5pt;
+            color: #0f172a;
+        }
+
+        .gabarito-section {
+            margin-top: 40px;
+            border-top: 2px dashed #cbd5e1;
+            padding-top: 30px;
+        }
+
+        .gabarito-title {
+            color: #b91c1c;
+            border-left-color: #b91c1c;
+        }
+        
+        .badge {
+            background-color: #e2e8f0;
+            color: #334155;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 8.5pt;
+            font-weight: bold;
+            vertical-align: middle;
+        }
+        
+        .badge-unit { background-color: #dbeafe; color: #1e40af; }
+        .badge-int { background-color: #fae8ff; color: #86198f; }
+    </style>
+</head>
+<body>
+
+    <h1>Aula 14 - Atividade Prática</h1>
+    <div class="subtitle">Laboratório de Testes com PHPUnit no Windows: Caça aos Bugs</div>
+
+    <h2>1. Objetivos da Atividade</h2>
+    <p>
+        Esta atividade prática visa consolidar os conceitos de <strong>Testes Unitários</strong> e <strong>Testes de Integração</strong> utilizando o framework PHPUnit em ambiente Windows. Você atuará como um engenheiro de QA/DevOps encarregado de identificar e expor falhas ocultas em um componente de software crítico que foi reportado com comportamento instável pelo setor de produção.
+    </p>
+    <p>Ao final deste laboratório, você deverá ser capaz de:</p>
+    <ul>
+        <li>Configurar e arquitetar de forma autônoma o ambiente do PHPUnit no Windows.</li>
+        <li>Escrever asserções unitárias para validar regras de negócio complexas e limites de valores (Boundary Testing).</li>
+        <li>Desenvolver testes de integração que interagem com o sistema de arquivos do Windows, manipulando o ciclo de vida do ambiente através de métodos de inicialização e limpeza.</li>
+    </ul>
+
+    <div class="alert-box">
+        <p><strong>Atenção:</strong> Todo o ecossistema de comandos deste documento foi desenhado para execução no terminal do Windows (PowerShell ou CMD). Certifique-se de utilizar as barras invertidas (<code>\</code>) corretas ao referenciar executáveis locais.</p>
+    </div>
+
+    <h2>2. Preparação do Ambiente (Instruções de Inicialização)</h2>
+    <p>Antes de copiar o código defeituoso, você deve estruturar o projeto na sua máquina Windows seguindo os passos abaixo:</p>
+    <ol>
+        <li>Abra o PowerShell na pasta de sua preferência e crie o diretório do projeto:
+            <pre><code>mkdir caca-ao-bug&#10;cd caca-ao-bug</code></pre>
+        </li>
+        <li>Inicialize o Composer e adicione o PHPUnit como dependência de desenvolvimento:
+            <pre><code>composer require --dev phpunit/phpunit</code></pre>
+        </li>
+        <li>Crie a estrutura de diretórios necessária para a organização do código e dos testes:
+            <pre><code>mkdir src&#10;mkdir tests</code></pre>
+        </li>
+        <li>Configure o autoloading padrão <strong>PSR-4</strong> no arquivo <code>composer.json</code> adicionando os mapeamentos para <code>App\\</code> e <code>Tests\\</code>, e em seguida execute <code>composer dump-autoload</code> no terminal.</li>
+        <li>Crie o arquivo de configuração <code>phpunit.xml</code> na raiz do projeto, apontando a suíte de testes para o diretório <code>tests</code> e habilitando a propriedade de cores (<code>colors="true"</code>).</li>
+    </ol>
+
+    <h2>3. O Código Fonte sob Suspeita</h2>
+    <p>Crie o arquivo <code>GerenciadorPedidos.php</code> dentro da pasta <code>src/</code> e cole integralmente o código abaixo. Esta classe possui <strong>três bugs ocultos</strong> (dois de unidade e um de integração) inseridos propositalmente pela equipe de desenvolvimento anterior.</p>
+
+    <pre><code>&lt;?php
+
+namespace App;
+
+class GerenciadorPedidos
+{
+    private string $caminhoArquivo = 'pedidos.json';
+
+    public function processarPedido(float $subtotal, string $cupom, string $dataPedido): array
+    {
+        // Regra de Negócio: Compras a partir de R$ 100,00 possuem Frete Grátis.
+        // Caso contrário, o valor fixo do frete é R$ 15,00.
+        $frete = 15.00;
+        if ($subtotal &gt; 100.00) { 
+            $frete = 0.00;
+        }
+
+        // Regra de Negócio: O cupom 'DESCONTO10' concede 10% de desconto sobre o subtotal.
+        // No entanto, este cupom expirou oficialmente em 01/05/2026.
+        $desconto = 0.00;
+        if ($cupom === 'DESCONTO10') {
+            $dataExpiracao = '2026-05-01';
+            if ($dataPedido &gt; $dataExpiracao) { 
+                $desconto = $subtotal * 0.10;
+            }
+        }
+
+        $total = $subtotal + $frete - $desconto;
+
+        return [
+            'subtotal' =&gt; $subtotal,
+            'frete'    =&gt; $frete,
+            'desconto' =&gt; $desconto,
+            'total'    =&gt; $total
+        ];
+    }
+
+    public function gravarPedido(array $pedido): bool
+    {
+        $json = json_encode($pedido);
+        // Persiste o pedido salvando o conteúdo no disco rígido do Windows
+        return file_put_contents($this->caminhoArquivo, $json, FILE_APPEND) !== false;
+    }
+
+    public function lerUltimoPedido(): ?array
+    {
+        if (!file_exists($this->caminhoArquivo)) {
+            return null;
+        }
+        $conteudo = file_get_contents($this->caminhoArquivo);
+        return json_decode($conteudo, true);
+    }
+
+    public function setCaminhoArquivo(string $caminho): void
+    {
+        $this->caminhoArquivo = $caminho;
+    }
+}</code></pre>
+
+    <h2>4. Enunciado da Atividade e Pistas Textuais</h2>
+    <p>
+        <strong>Sua Missão:</strong> Você <b>não</b> deve alterar o código da classe <code>GerenciadorPedidos</code>. Primeiro, você deve criar um arquivo chamado <code>GerenciadorPedidosTest.php</code> dentro da pasta <code>tests/</code> e escrever cenários de teste automatizados baseados nas reclamações coletadas pelo suporte técnico. 
+    </p>
+    <p>
+        Seu objetivo inicial é fazer com que o comando <code>.\vendor\bin\phpunit</code> acuse <strong>falhas (Failure)</strong>, comprovando cientificamente a existência dos defeitos. Use as pistas abaixo para modelar seus testes:
+    </p>
+
+    <div class="dica-box">
+        <h4>Pista 1: O Mistério do Frete Fixo <span class="badge badge-unit">Unidade</span></h4>
+        <p>O setor de atendimento ao cliente abriu um chamado informando que um consumidor realizou uma compra de exatamente R$ 100,00 e o sistema cobrou a taxa de frete de R$ 15,00, embora a publicidade do site prometa frete grátis <em>a partir</em> desse valor.</p> <br>
+        <p><b>Escreva um teste unitário focado no valor limite para capturar essa falha.</b></p>
+    </div>
+
+    <div class="dica-box">
+        <h4>Pista 2: O Cupom do Passado <span class="badge badge-unit">Unidade</span></h4>
+        <p>O departamento financeiro descobriu uma anomalia grave: o cupom "DESCONTO10", que deveria ter sido desativado em maio de 2026, continuou aplicando deduções em compras realizadas em junho de 2026. Curiosamente, clientes que tentaram usar o cupom em abril alegaram que o desconto não foi computado.</p><br>
+        <p><b>Monte testes com datas distintas para expor o erro de lógica temporal.</b></p>
+    </div>
+
+    <div class="dica-box">
+        <h4>Pista 3: A Corrupção de Dados no Disco <span class="badge badge-int">Integração</span></h4>
+        <p>A equipe de TI reportou que o método de persistência funciona perfeitamente para salvar e ler um único pedido isolado. No entanto, se o sistema processar mais de uma venda sequencialmente, o arquivo <code>pedidos.json</code> torna-se ilegível, quebrando o sistema de auditoria.</p><br>
+        <p><b>Crie um teste de integração que simule a gravação de dois pedidos em seguida e tente ler o último.</p><br>
+        <p><em><b>Dica de ouro:</b> Certifique-se de isolar os arquivos gerados em cada execução para não deixar lixo no sistema Windows.</em></p>
+    </div>
+
+    <h2>5. Entregas Esperadas</h2>
+    <p>Para a conclusão com sucesso desta atividade, vocês deverão apresentar:</p>
+    <ol>
+        <li>O arquivo original de testes (<code>GerenciadorPedidosTest.php</code>) apontando as falhas capturadas no terminal através do PHPUnit, através de comentários no código.</li>
+        <li>Um Bug Report completo para cada um dos defeitos.</li>
+        <li>O código da classe <code>GerenciadorPedidos.php</code> totalmente corrigido e o print do terminal exibindo a tão desejada <strong>barra verde (OK)</strong> do PHPUnit indicando sucesso absoluto em todos os testes.</li>
+    </ol>
+</body>
+</html>
